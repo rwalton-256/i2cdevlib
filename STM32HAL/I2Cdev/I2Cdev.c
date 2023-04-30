@@ -55,10 +55,10 @@ void I2Cdev_init(I2C_HandleTypeDef * hi2c){
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Status of read operation (true = success)
  */
-uint8_t I2Cdev_readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t *data, uint16_t timeout)
+uint8_t I2Cdev_readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t *data)
 {
     uint8_t b;
-    uint8_t count = I2Cdev_readByte(devAddr, regAddr, &b, timeout);
+    uint8_t count = I2Cdev_readByte(devAddr, regAddr, &b);
     *data = b & (1 << bitNum);
     return count;
 }
@@ -71,10 +71,10 @@ uint8_t I2Cdev_readBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Status of read operation (true = success)
  */
-uint8_t I2Cdev_readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data, uint16_t timeout)
+uint8_t I2Cdev_readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data)
 {
     uint16_t b;
-    uint8_t count = I2Cdev_readWord(devAddr, regAddr, &b, timeout);
+    uint8_t count = I2Cdev_readWord(devAddr, regAddr, &b);
     *data = b & (1 << bitNum);
     return count;
 }
@@ -88,7 +88,7 @@ uint8_t I2Cdev_readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Status of read operation (true = success)
  */
-uint8_t I2Cdev_readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data, uint16_t timeout)
+uint8_t I2Cdev_readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data)
 {
     // 01101001 read byte
     // 76543210 bit numbers
@@ -96,7 +96,7 @@ uint8_t I2Cdev_readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint
     //    010   masked
     //   -> 010 shifted
     uint8_t count, b;
-    if ((count = I2Cdev_readByte(devAddr, regAddr, &b, timeout)) != 0)
+    if ((count = I2Cdev_readByte(devAddr, regAddr, &b)) != 0)
     {
         uint8_t mask = ((1 << length) - 1) << (bitStart - length + 1);
         b &= mask;
@@ -115,7 +115,7 @@ uint8_t I2Cdev_readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Status of read operation (1 = success, 0 = failure, -1 = timeout)
  */
-uint8_t I2Cdev_readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data, uint16_t timeout)
+uint8_t I2Cdev_readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data)
 {
     // 1101011001101001 read byte
     // fedcba9876543210 bit numbers
@@ -124,7 +124,7 @@ uint8_t I2Cdev_readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uin
     //           -> 010 shifted
     uint8_t count;
     uint16_t w;
-    if ((count = I2Cdev_readWord(devAddr, regAddr, &w, timeout)) != 0)
+    if ((count = I2Cdev_readWord(devAddr, regAddr, &w)) != 0)
     {
         uint16_t mask = ((1 << length) - 1) << (bitStart - length + 1);
         w &= mask;
@@ -141,9 +141,9 @@ uint8_t I2Cdev_readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uin
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Status of read operation (true = success)
  */
-uint8_t I2Cdev_readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data, uint16_t timeout)
+uint8_t I2Cdev_readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data)
 {
-    return I2Cdev_readBytes(devAddr, regAddr, 1, data, timeout);
+    return I2Cdev_readBytes(devAddr, regAddr, 1, data);
 }
 
 /** Read single word from a 16-bit device register.
@@ -153,9 +153,9 @@ uint8_t I2Cdev_readByte(uint8_t devAddr, uint8_t regAddr, uint8_t *data, uint16_
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Status of read operation (true = success)
  */
-uint8_t I2Cdev_readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data, uint16_t timeout)
+uint8_t I2Cdev_readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data)
 {
-    return I2Cdev_readWords(devAddr, regAddr, 1, data, timeout);
+    return I2Cdev_readWords(devAddr, regAddr, 1, data);
 }
 
 /** Read multiple bytes from an 8-bit device register.
@@ -166,12 +166,10 @@ uint8_t I2Cdev_readWord(uint8_t devAddr, uint8_t regAddr, uint16_t *data, uint16
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Number of bytes read (-1 indicates failure)
  */
-uint8_t I2Cdev_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data, uint16_t timeout)
+uint8_t I2Cdev_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8_t *data)
 {
-    uint16_t tout = timeout > 0 ? timeout : I2CDEV_DEFAULT_READ_TIMEOUT;
-
-    HAL_I2C_Master_Transmit(I2Cdev_hi2c, devAddr << 1, &regAddr, 1, tout);
-    if (HAL_I2C_Master_Receive(I2Cdev_hi2c, devAddr << 1, data, length, tout) == HAL_OK) return length;
+    HAL_I2C_Master_Transmit(I2Cdev_hi2c, devAddr << 1, &regAddr, 1, I2CDEV_DEFAULT_READ_TIMEOUT);
+    if (HAL_I2C_Master_Receive(I2Cdev_hi2c, devAddr << 1, data, length, I2CDEV_DEFAULT_READ_TIMEOUT) == HAL_OK) return length;
     return -1;
 }
 
@@ -183,12 +181,10 @@ uint8_t I2Cdev_readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
  * @param timeout Optional read timeout in milliseconds (0 to disable, leave off to use default class value in I2Cdev_readTimeout)
  * @return Number of words read (-1 indicates failure)
  */
-uint8_t I2Cdev_readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data, uint16_t timeout)
+uint8_t I2Cdev_readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint16_t *data)
 {
-    uint16_t tout = timeout > 0 ? timeout : I2CDEV_DEFAULT_READ_TIMEOUT;
-
-    HAL_I2C_Master_Transmit(I2Cdev_hi2c, devAddr << 1, &regAddr, 1, tout);
-    if (HAL_I2C_Master_Receive(I2Cdev_hi2c, devAddr << 1, (uint8_t *)data, length*2, tout) == HAL_OK)
+    HAL_I2C_Master_Transmit(I2Cdev_hi2c, devAddr << 1, &regAddr, 1, I2CDEV_DEFAULT_READ_TIMEOUT);
+    if (HAL_I2C_Master_Receive(I2Cdev_hi2c, devAddr << 1, (uint8_t *)data, length*2, I2CDEV_DEFAULT_READ_TIMEOUT) == HAL_OK)
         return length;
     else
         return -1;
@@ -204,7 +200,7 @@ uint8_t I2Cdev_readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
 uint16_t I2Cdev_writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8_t data)
 {
     uint8_t b;
-    I2Cdev_readByte(devAddr, regAddr, &b, I2Cdev_readTimeout);
+    I2Cdev_readByte(devAddr, regAddr, &b);
     b = (data != 0) ? (b | (1 << bitNum)) : (b & ~(1 << bitNum));
     return I2Cdev_writeByte(devAddr, regAddr, b);
 }
@@ -219,7 +215,7 @@ uint16_t I2Cdev_writeBit(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint8
 uint16_t I2Cdev_writeBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t data)
 {
     uint16_t w;
-    I2Cdev_readWord(devAddr, regAddr, &w, 100);
+    I2Cdev_readWord(devAddr, regAddr, &w);
     w = (data != 0) ? (w | (1 << bitNum)) : (w & ~(1 << bitNum));
     return I2Cdev_writeWord(devAddr, regAddr, w);
 }
@@ -242,7 +238,7 @@ uint16_t I2Cdev_writeBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, ui
     // 10100011 original & ~mask
     // 10101011 masked | value
     uint8_t b;
-    if (I2Cdev_readByte(devAddr, regAddr, &b, 100) != 0)
+    if (I2Cdev_readByte(devAddr, regAddr, &b) != 0)
     {
         uint8_t mask = ((1 << length) - 1) << (bitStart - length + 1);
         data <<= (bitStart - length + 1); // shift data into correct position
@@ -275,7 +271,7 @@ uint16_t I2Cdev_writeBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, u
     // 1010001110010110 original & ~mask
     // 1010101110010110 masked | value
     uint16_t w;
-    if (I2Cdev_readWord(devAddr, regAddr, &w, 100) != 0)
+    if (I2Cdev_readWord(devAddr, regAddr, &w) != 0)
     {
         uint16_t mask = ((1 << length) - 1) << (bitStart - length + 1);
         data <<= (bitStart - length + 1); // shift data into correct position
